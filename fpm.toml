@@ -1,0 +1,23 @@
+name = "ecerad"
+version = "0.1.0"
+license = "license"
+author = "Edmondo Giovannozzi"
+maintainer = "edmondo.giovannozzi@enea.it"
+copyright = "Copyright 2023, Edmondo Giovannozzi"
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+module-naming = false
+[library]
+source-dir = "src"
+include-dir = "include"
+[install]
+library = true
+[fortran]
+implicit-typing = false
+implicit-external = false
+source-form = "free"
+[dependencies]
+dop853 = { git="https://github.com/jacobwilliams/dop853.git" }
+
