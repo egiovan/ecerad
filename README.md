@@ -17,22 +17,31 @@ Ther is just a routine with the following interface:
 subroutine radiation_temperature(r, ne, te, b, rs, theta, te_rad, te_rad_profile)
   real(wp),intent(in) :: r(:), ne(:), te(:), b(:)
   real(wp),intent(in) :: rs(:), theta
-  real(wp), intent(out) :: te_rad(:), te_rad_profile(:,:)
+  real(wp),intent(out) :: te_rad(:), te_rad_profile(:,:)
 end subroutine
 ```
-Description of the plasma profiles:
 
-r:     Major radius (m)
-ne:    electron density (m^-3)
-te:    electron temperatue (eV)
-b:     magnetic field (T)
+<table>
+<caption style="text-align:left"> Description of the plasma profiles </caption>
+<tr><td> r: </td><td> Major radius (m) </td></tr>
+<tr><td> ne: </td><td> electron density (m^-3)</td></tr>
+<tr><td> te: </td><td> electron temperatue (eV)</td></tr>
+<tr><td> b: </td><td>  magnetic field (T)</td></tr>
+</table>
 
-Description of the receiving apparatus:
 
-theta:  angle to the perpendicular of the magnetic field 
-rs:     major radius where 2*omega_x will be resonant
-te_rad: radiation temperature (eV)
-te_rad_profile: evolution of the radiation temperature along the major radius. 
+<table>
+<caption style="text-align:left"> Description of the receiving apparatus </caption>
+<tr><td> theta: </td><td> angle to the perpendicular of the magnetic field </td></tr>
+
+<tr><td> rs: </td><td>   major radius where 2*omega_x will be resonant </td></tr>
+</table>
+
+<table>
+<caption style="text-align:left"> Output </caption>
+<tr><td> te_rad: </td><td> radiation temperature (eV) </td></tr>
+<tr><td> te_rad_profile: </td><td> evolution of the radiation temperature along the major radius.  (eV) </td></tr>
+</table>
 
 For thick plasma generally te is close to te_rad, this is typically not true in case of a cutoff, or at the edge of the plsama where the density is too low and the so called shine-thorugh happens. 
 
@@ -52,7 +61,10 @@ call radiation_temperature(r, ne, te, b, rs, theta, te_rad, te_rad_profile)
 ...
 ```
 
+Compilation:
 
+A Makefile is used to both launch `fpm` and to compile a shared library to be used by Python codes.
 
+The shared library is in `./py_ecerad` and the module is `ecerad.py`
 
 
