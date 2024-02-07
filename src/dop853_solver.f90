@@ -48,7 +48,6 @@ subroutine solve_dop853(func, rr, te, i_start, rs, te_rad_profile, te_rad)
   te_rad = y_sol(1)
 contains
   subroutine fvpol(this, r, y, f)
-    !! Right-hand side of van der Pol's equation
     implicit none
 
     class(dop853_class),intent(inout) :: this

@@ -28,6 +28,26 @@ _library.radiation_temperature.argtypes = [
     ]
 
 def radiation_temperature(r, ne, te, b, rs, theta):
+    """ ECE Radiation temperature.
+    r    [nr]   major radius (m)
+    ne   [nr]   electron density (m^-3)
+    te   [nr]   electron temperature (eV)
+    b    [nr]   magnetic field (T)
+    rs   [ns]   radii where a resonant radiation temperature is calculated
+    theta       angle of the viewing line respect to the perpendicular to the magnetic field
+
+    The array r, ne, te, and b should have the same lenght and specify the plasma profiles.
+    the r array should be strictly increasing.
+
+    rs is used to specify the frequency of the radiation temperature. In a thick plasma the 
+    radiation temperature at the frequency corresponding to rs will be equal to the actual
+    temerature at rs.
+    return:
+    te_rad [ns]      radiation temperature
+    te_rad_profile [ns, nr]  radiation temperature evolution.
+    typically te_rad == te_rad_profile[:,-1]
+
+    """
     r = np.ascontiguousarray(r, dtype=np.float64)
     ne = np.ascontiguousarray(ne, dtype=np.float64)
     te = np.ascontiguousarray(te, dtype=np.float64)

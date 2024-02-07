@@ -7,8 +7,6 @@ module ecerad
 
   real(wp), parameter :: kb = e ! Temperature in eV
   logical, parameter :: USE_FLINT = .TRUE.
-  !real(wp), parameter :: RELATIVE_TOLERANCE = 1.0e-5_wp
-  !real(wp), parameter :: ABSOLUTE_TOLERANCE = 1.0e-7_wp
 
   type Profile
     real(wp), allocatable :: r(:)
@@ -36,7 +34,7 @@ elemental function refractor_index(X, Y, theta) result(r)
   delta = xy2**2*s2**2 + 4*y2m**2*xy2**2*Y**2*c2
   a = xym*s2 + y2m*x2m*c2
   r = (b - sqrt(delta))/2/a
-  !return , (b + np.sqrt(delta))/2/a
+
 end function
 
 
@@ -75,8 +73,8 @@ subroutine radiation_evolution(pr, theta, rs, te_rad, te_rad_profile)
   Bs = np_interp(rs, pr%r, pr%B)
   omega = 2*e*Bs/me
   eta_2x = 0.5_wp + &
-              (1.0_wp/8_wp*cos(theta)**4 + sin(theta)**2)/ &
-              ((1 + sin(theta)**2)*sqrt(sin(theta)**2 + 1.0_wp/16_wp*cos(theta)**4)) 
+              (1.0_wp/8.0_wp*cos(theta)**4 + sin(theta)**2)/ &
+              ((1 + sin(theta)**2)*sqrt(sin(theta)**2 + 1.0_wp/16.0_wp*cos(theta)**4)) 
 
   omega_x = e*pr%B/me
   omega_p = sqrt(pr%ne*e**2/epsilon_0/me)
@@ -94,13 +92,10 @@ subroutine radiation_evolution(pr, theta, rs, te_rad, te_rad_profile)
   else
     call solve_dop853(func, pr%r, pr%te, i_start, rs, te_rad_profile, te_rad)
   endif
-  !
-  !print *, te_rad_profile - te_rad_profile_flint
-  !print *,'DOP853,FLINT te_rad', te_rad, te_rad_flint, te_rad_flint/te_rad - 1, t1-t0, t2-t1
+
 contains
 !------------------------------------------------------------------------------------------
   subroutine func(r, y, f)
-    !! Right-hand side of van der Pol's equation
     implicit none
     real(wp),intent(in)               :: r
     real(wp),dimension(:),intent(in)  :: y
