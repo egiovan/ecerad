@@ -1,5 +1,6 @@
 program check_integration
     use ecerad
+    use ecerad_utils, only: linspace
     implicit none
     integer, parameter :: NR = 100
     integer, parameter :: NS = 4
@@ -78,14 +79,5 @@ contains
   end subroutine
 
 !----------------------------------------------------------------
-  subroutine linspace(v, vmin, vmax)
-    real(wp), intent(out) :: v(:)
-    real(wp), intent(in) :: vmin, vmax
-    real(wp) :: dv
-    integer :: i, n
 
-    n = size(v)
-    dv = (vmax - vmin)/(n-1)
-    v = [(vmin + dv*(i-1), i=1,n)]
-end subroutine
 end program

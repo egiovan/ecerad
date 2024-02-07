@@ -4,6 +4,7 @@ license = "license"
 author = "Edmondo Giovannozzi"
 maintainer = "edmondo.giovannozzi@enea.it"
 copyright = "Copyright 2023, Edmondo Giovannozzi"
+homepage = "https://github.com/egiovan/ecerad"
 [build]
 auto-executables = true
 auto-tests = true

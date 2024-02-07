@@ -1,13 +1,14 @@
 module ecerad
   use ecerad_base
-  use dop853_module, only: dop853_class
-  use FLINT, only: DiffEqSys
+  use dop853_solver, only: solve_dop853
+  use flint_solver, only: solve_flint
+  use ecerad_utils
   implicit none
 
   real(wp), parameter :: kb = e ! Temperature in eV
   logical, parameter :: USE_FLINT = .TRUE.
-  real(wp), parameter :: RELATIVE_TOLERANCE = 1.0e-5_wp
-  real(wp), parameter :: ABSOLUTE_TOLERANCE = 1.0e-7_wp
+  !real(wp), parameter :: RELATIVE_TOLERANCE = 1.0e-5_wp
+  !real(wp), parameter :: ABSOLUTE_TOLERANCE = 1.0e-7_wp
 
   type Profile
     real(wp), allocatable :: r(:)
@@ -16,34 +17,7 @@ module ecerad
     real(wp), allocatable :: b(:)
   end type
 
-  abstract interface
-    subroutine solver_func(r, y, f)
-      import wp
-      !! Right-hand side of van der Pol's equation
-      implicit none
-      real(wp),intent(in)               :: r
-      real(wp),dimension(:),intent(in)  :: y
-      real(wp),dimension(:),intent(out) :: f
-    end subroutine
-  end interface
-
-  type , extends(DiffEqSys) :: flint_sys
-    procedure(solver_func), pointer, nopass :: step
-  contains
-    procedure :: F => flint_func     ! Differential equations
-  end type flint_sys
-
 contains
-
-function flint_func(me, X, Y, Params)
-  implicit none
-  class(flint_sys), intent(inout) :: me !< Differential Equation object
-  real(WP), intent(in) :: X
-  real(WP), intent(in), dimension(me%n) :: Y
-  real(WP), intent(in), dimension(:), optional :: Params
-  real(WP), dimension(size(Y)) :: flint_func
-  call me%step(X,Y,flint_func)
-end function
 
 elemental function refractor_index(X, Y, theta) result(r)
   real(wp), intent(in) :: X, Y, theta
@@ -154,120 +128,6 @@ contains
   end subroutine
 end subroutine
 
-subroutine solve_flint(func_flint, rr, te, i_start, rs, te_rad_profile, te_rad)
-  use FLINT
-  procedure(solver_func) :: func_flint
-
-  real(wp),intent(in) :: rr(:), te(:), rs
-  integer,intent(in) :: i_start 
-  real(wp) :: te_rad, te_rad_profile(:), y0(1), yf(1), h
-
-  real(wp) :: r_start, r_end
-  type(ERK_class) :: erk
-  type(flint_sys),target :: prop
-
-  prop%n = 1
-  prop%step => func_flint
-
-  call erk%Init(prop, 10000, Method=ERK_DOP54, &
-     ATol=[ABSOLUTE_TOLERANCE], RTol=[RELATIVE_TOLERANCE], &
-   InterpOn=.TRUE., eventsOn=.False., maxstepsize=0.02_wp)
-  r_start = rr(i_start)
-  r_end = rr(size(rr))
-  y0 = 0.0
-  h = 0.0
-  call erk%Integrate(r_start, y0, r_end, yf, StepSz=h, IntStepsOn=.FALSE.)
-  te_rad = yf(1)
-  te_rad_profile = 0.0
-  call erk%Interpolate(rr(i_start:), te_rad_profile(i_start:))
-end subroutine
-
-subroutine solve_dop853(func, rr, te, i_start, rs, te_rad_profile, te_rad)
-  procedure(solver_func) :: func
-
-  real(wp),intent(in) :: rr(:), te(:), rs
-  integer,intent(in) :: i_start 
-  real(wp) :: te_rad, te_rad_profile(:)
-
-  type(dop853_class) :: prop
-  logical :: status_ok
-  integer :: idid, ix
-  real(wp) :: y_sol(1), rtol(1), atol(1), r, f_sol(1)
-  real(wp) :: r_start, r_end
-  call prop%initialize(n=1, fcn=fvpol, status_ok=status_ok, solout=solout_func, icomp=[1], hmax=0.02_wp)
-  if (.not. status_ok) error stop "Error initializing solver"
-  
-  y_sol = 0.0
-  rtol = RELATIVE_TOLERANCE
-  atol = ABSOLUTE_TOLERANCE
-  r_start = rr(i_start)
-  r_end = rr(size(rr))
-  r = r_start
-  ix = i_start
-  te_rad_profile = 0.0
-  call prop%integrate(r,y_sol,r_end,rtol,atol,iout=3,idid=idid)
-
-  if (idid < 0) then
-    print *,'--------------------------------------------------------------------'
-    print *,'IDID:', idid, i_start,  y_sol
-    print *,'IDID:', r_start, r, rs, rr(i_start + 1)
-    print *,'---- ', np_interp(r_start, rr,te),np_interp(r, rr,te), np_interp(rs, rr,te)
-    y_sol = 0.0
-    call fvpol(prop, r, y_sol, f_sol)
-    print *,'     ', f_sol
-    print *,'---------------------------------------------------------------------'
-  endif
-
-  te_rad = y_sol(1)
-contains
-  subroutine fvpol(this, r, y, f)
-    !! Right-hand side of van der Pol's equation
-    implicit none
-
-    class(dop853_class),intent(inout) :: this
-    real(wp),intent(in)               :: r
-    real(wp),dimension(:),intent(in)  :: y
-    real(wp),dimension(:),intent(out) :: f
-    call func(r,y,f)
-  end subroutine
-
-  subroutine solout_func(this,nr,xold,x,y,irtrn,xout)
-    !! `solout` furnishes the solution `y` at the `nr`-th
-    !! grid-point `x` (thereby the initial value is
-    !! the first grid-point).
-
-    class(dop853_class),intent(inout) :: this
-    integer,intent(in)                :: nr    !! grid point (0,1,...)
-    real(wp),intent(in)               :: xold  !! the preceding grid point
-    real(wp),intent(in)               :: x     !! current grid point
-    real(wp),dimension(:),intent(in)  :: y     !! state vector \( y(x) \) [size n]
-    integer,intent(inout)             :: irtrn !! serves to interrupt the integration. if
-                                              !! `irtrn` is set `<0`, [[dop853]] will return to
-                                              !! the calling program. if the numerical solution
-                                              !! is altered in `solout`, set `irtrn = 2`.
-    real(wp),intent(out)              :: xout  !! `xout` can be used for efficient intermediate output
-                                              !! if one puts `iout=3`. when `nr=1` define the first
-                                              !! output point `xout` in `solout`. the subroutine
-                                              !! `solout` will be called only when `xout` is in the
-                                              !! interval `[xold,x]`; during this call
-                                              !! a new value for `xout` can be defined, etc.
-    !print *,'SOLOUT ---------------------------------------------'
-    do 
-      if (ix>size(rr)) exit
-      if (rr(ix)>= xold .and. rr(ix) <= x) then
-        te_rad_profile(ix) = this%contd8(1, rr(ix))
-        !print *,'SOLOUT', ix, pr%r(ix), this%contd8(1, pr%r(ix))
-        ix = ix + 1
-      else
-        xout = rr(ix)
-        exit
-      endif
-    enddo
-
-  end subroutine solout_func
-end subroutine
-
-
 !===============================================================================================
 
 !---------------------------------------------------------------------------------------
@@ -289,49 +149,5 @@ end function
 logical function check_equal(sh) result(r)
   integer :: sh(:)
   r = all(sh(1)==sh(2:))
-end function
-
-function np_interp(x, xf, vf) result(r)
-  real(wp),intent(in) :: x, xf(:), vf(:)
-  real(wp) :: r
-  integer :: n, i,is, ie, im
-  n = size(xf)
-  
-  if (x <= xf(1)) then
-    r = vf(1)
-    RETURN
-  endif
-  if (x >= xf(n)) then
-    r = vf(n)
-    return
-  endif
-! I'm doing it in a stupid way
-  if (n < 16) then ! stupid way
-    do i=1, size(xf)-1
-      if (x < xf(i+1)) then ! is between i, i+1
-        r = linear_interp(x, i)
-        exit
-      endif
-    enddo
-  else
-    is = 1
-    ie = n
-    do 
-      if (is + 1 == ie) exit
-      im = (is+ie)/2
-      if (x >= xf(im)) then
-        is = im
-      else
-        ie = im
-      endif
-    enddo
-    r = linear_interp(x, is)
-  endif
-contains
-  real(wp) function linear_interp(x, i)
-    real(wp), intent(in) :: x
-    integer,intent(in) :: i
-    linear_interp = (vf(i+1) - vf(i))/(xf(i+1) - xf(i))*(x - xf(i)) + vf(i)
-  end function  
 end function
 end module ecerad
