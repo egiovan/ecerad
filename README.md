@@ -1,11 +1,10 @@
 # ecerad
-Calculate ECE emission from a tokamak plasma according to the approximations found in:
-
-"Rathgeber,Plasma Phys. Control. Fusion 55 (2013) 025004 (15pp)"
+Calculate ECE emission from a tokamak plasma according to the approximations found in[^1].
 
 In particular it assumes the radiation at double the extraordinary wave in an almost perpendicular settings. The plasma refraction index is assumed to be one.
 
-Differently to the article the *theta* angular variable is referred to the perpendicular to the magnetic field: *theta_rathgeber* = *pi*/2  - *theta*.
+Differently to the article the $\theta$ angular variable is referred to the perpendicular to the magnetic field: $\theta_{Rathgeber} = \pi/2  - \theta$.
+Moreover the software assume a propagation with $\theta$ close to zero (perpendicular to the magnetic field) as it generally happens in actual ECE diagnostic. 
 
 It can use two kind of solver:
 
@@ -67,4 +66,45 @@ A Makefile is used to both launch `fpm` and to compile a shared library to be us
 
 The shared library is in `./py_ecerad` and the module is `ecerad.py`
 
+## Notes on the equations
 
+The equations are those present in Rathgeber[^1], with all $\sin$'s converted to $\cos$'s and viceversa, so that the angle $\theta$ will be equal to zero cloe to the perpedicular to the magnetic field (it is adifferent convention compared to what found in the literature).
+
+Following[^1] we are solving the following equation:
+$$ \frac d {ds} T_{rad}(s,\omega)= \frac{8\pi^3c^2}{k_B\omega^2} j_{2X}(s,\omega) \left( 1- \frac{T_{rad}(s,\omega)}{T_e(s)} \right)$$
+
+That is the same equation (7)[^1] with $N^2=1$ having transformed the intensity to temperature usign (9)[^1].
+
+$$j_{2X} = \eta_{2X} \frac{e^2\omega_{2X}^2}{16\pi^2\zeta^2} \frac{n_e}{\epsilon_0 c}  \cos^2 \theta (1+\sin^2 \theta) 
+
+\frac {2\omega}{\omega_{2X}^2}\bar\Phi(\mu)$$
+
+with:
+$$\omega_{2X} = 2 \frac{eB}{m_e}\text{,    } 
+\zeta= \frac{m_ec^2}{2k_BT_e}\text{,    }
+\mu=\frac{\omega^2}{\omega^2_{2X}}$$
+
+and:
+$$\eta=\frac 1 2 + \frac{\frac 1 8 \cos^4 \theta + \sin^2 \theta}{(1+\sin^2 \theta)\sqrt{\sin^2 \theta + \frac 1 {16} \cos^4 \theta}}$$
+
+$$\bar\Phi(\mu) = \frac{\zeta^{3/2}}{2\sqrt\pi \mu^2 \sin^5\theta}\left(I(\alpha_1) -I(\alpha_2)\right)$$
+$$I(\alpha) = \exp({-\zeta[1-\mu\alpha]})\left( -\frac {\cos^2\theta}{\sqrt\alpha} + \frac {\eta^2}{\zeta\mu} - \frac 1 {\sqrt{\zeta\mu}}\left[ 3\eta -2\zeta\cos^2\theta F(\sqrt{\zeta\mu\alpha})\right]
+\right)$$
+
+Where we have:
+$$
+\alpha_{1,2} = \frac {(1 \pm \sqrt{1 -\mu\cos^2\theta} \sin\theta)^2}{(1+\mu\sin^2\theta)^2}
+$$
+and
+$$
+\eta = 1+\mu\sin^2\theta
+$$
+Moreover $F(x)=\exp(-x^2) \int_0^x \exp y^2 dy $ is the Dawson integral[^2], which has been translated to Fortran from a C source.
+To compare this definition of $ \bar\Phi(\mu) $ with that in [^1] one have to remind that $\Phi(\omega)=2\omega/\omega_{2X}^2\bar\Phi(\mu)$, just a change of coordinates.  
+
+Close to $\theta=0$ a taylor approximation of $\bar\Phi(\mu)$ is used. That exact Taylor approximation has been obtained with Maxima [^3], and it is not reported here due to its complexity but can be read on the sources.
+
+
+[^1]: Rathgeber,Plasma Phys. Control. Fusion 55 (2013) 025004 (15pp)
+[^2]: http://ab-initio.mit.edu/wiki/index.php/Faddeeva_Package
+[^3]:  Maxima, a Computer Algebra System. https://maxima.sourceforge.io/
