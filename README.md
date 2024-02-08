@@ -76,8 +76,7 @@ $$ \frac d {ds} T_{rad}(s,\omega)= \frac{8\pi^3c^2}{k_B\omega^2} j_{2X}(s,\omega
 
 That is the same equation (7)[^1] with $N^2=1$ having transformed the intensity to temperature usign (9)[^1].
 
-$$j_{2X} = \eta_{2X} \frac{e^2\omega_{2X}^2}{16\pi^2\zeta^2} \frac{n_e}{\epsilon_0 c}  \cos^2 \theta (1+\sin^2 \theta) 
-
+$$j_{2X} = \eta_{2X} \frac{e^2\omega_{2X}^2}{16\pi^2\zeta^2} \frac{n_e}{\epsilon_0 c}  \cos^2 \theta (1+\sin^2 \theta)
 \frac {2\omega}{\omega_{2X}^2}\bar\Phi(\mu)$$
 
 with:
