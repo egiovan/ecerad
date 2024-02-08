@@ -107,8 +107,8 @@ $$
 \eta = 1+\mu\sin^2\theta
 $$
 
-Moreover $F(x)=\exp(-x^2) \int_0^x \exp y^2 dy $ is the Dawson integral[^2], which has been translated to Fortran from a C source.
-To compare this definition of $ \bar\Phi(\mu) $ with that in [^1] one have to remind that $\Phi(\omega)=2\omega/\omega_{2X}^2\bar\Phi(\mu)$, just a change of coordinates.  
+Moreover $F(x)=\exp(-x^2) \int_0^x \exp y^2 dy$ is the Dawson integral[^2], which has been translated to Fortran from a C source.
+To compare this definition of $\bar\Phi(\mu)$ with that in [^1] one have to remind that $\Phi(\omega)=2\omega/\omega_{2X}^2\bar\Phi(\mu)$, just a change of coordinates.  
 
 Close to $\theta=0$ a taylor approximation of $\bar\Phi(\mu)$ is used. That exact Taylor approximation has been obtained with Maxima [^3], and it is not reported here due to its complexity but can be read on the sources.
 
