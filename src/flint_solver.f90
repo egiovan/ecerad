@@ -1,6 +1,7 @@
 module flint_solver
-  use FLINT, only: DiffEqSys
-  use ecerad_solver_commons
+  use FLINT, only: DiffEqSys, ERK_class, ERK_DOP54
+  use ecerad_solver_commons, only: solver_func
+  use ecerad_parameters, only: wp, ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE
   implicit none
   
   PRIVATE
@@ -26,7 +27,6 @@ contains
 
   
 subroutine solve_flint(func_flint, rr, te, i_start, rs, te_rad_profile, te_rad)
-  use FLINT
   procedure(solver_func) :: func_flint
 
   real(wp),intent(in) :: rr(:), te(:), rs

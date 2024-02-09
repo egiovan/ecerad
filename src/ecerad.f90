@@ -1,8 +1,10 @@
 module ecerad
-  use ecerad_base
+  use ecerad_parameters, only: wp
+  use ecerad_base, only: e, epsilon_0, me, c, mec2, pi
+  use ecerad_base, only: phi
   use dop853_solver, only: solve_dop853
   use flint_solver, only: solve_flint
-  use ecerad_utils
+  use ecerad_utils, only: np_interp
   implicit none
 
   real(wp), parameter :: kb = e ! Temperature in eV

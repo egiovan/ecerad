@@ -1,7 +1,8 @@
 module dop853_solver
   use dop853_module, only: dop853_class
-  use ecerad_utils
-  use ecerad_solver_commons
+  use ecerad_utils, only: np_interp
+  use ecerad_solver_commons, only: solver_func
+  use ecerad_parameters, only: wp,  ABSOLUTE_TOLERANCE, RELATIVE_TOLERANCE
   implicit none
 
   private

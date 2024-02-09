@@ -1,8 +1,9 @@
 module ecerad_utils
-  use iso_c_binding, only: wp => c_double
+  use ecerad_parameters, only: wp
   implicit none
+  private
 
-
+  public np_interp
 
 contains
 

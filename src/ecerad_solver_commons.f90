@@ -1,9 +1,10 @@
 module ecerad_solver_commons
-  use ecerad_base, only: wp
+  use ecerad_parameters, only: wp
   implicit none
+  PRIVATE
+  
+  public solver_func
 
-  real(wp), parameter :: RELATIVE_TOLERANCE = 1.0e-5_wp
-  real(wp), parameter :: ABSOLUTE_TOLERANCE = 1.0e-7_wp
 
   abstract interface
     subroutine solver_func(r, y, f)

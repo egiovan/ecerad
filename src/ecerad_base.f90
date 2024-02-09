@@ -1,7 +1,10 @@
 module ecerad_base
-    use iso_c_binding, only: wp => c_double
-    use dawson
+    use ecerad_parameters, only: wp, THETA_TAYLOR_MAX
+    use dawson, only: dawsn
     implicit none
+    PRIVATE
+    
+    public phi, e, epsilon_0, me, mec2, pi, c
 
     real(wp), parameter :: mev_to_ev = 1e6_wp
     real(wp), parameter :: c = 299792458.0_wp
@@ -101,7 +104,7 @@ elemental function phi(mu, te, theta) result(r)
     eta = 1 + mu*sin(theta_loc)**2
     !alpha1 = (1 + np.sqrt(1 - mu*np.cos(theta)**2)*np.sin(theta))**2/eta**2
     !alpha2 = (1 - np.sqrt(1 - mu*np.cos(theta)**2)*np.sin(theta))**2/eta**2
-    if (abs(theta_loc) < 0.01) then
+    if (abs(theta_loc) < THETA_TAYLOR_MAX) then
         r = main_approx(z, mu, theta_loc)
         return
     end if
