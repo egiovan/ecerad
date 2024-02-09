@@ -1,5 +1,5 @@
 # ecerad
-Calculate ECE emission from a tokamak plasma according to the approximations found in[^1].
+Calculate the ECE emission of second harmonic of the extraordinary wave from a tokamak plasma according to the approximations found in[^1].
 
 In particular it assumes the radiation at double the extraordinary wave in an almost perpendicular settings. The plasma refraction index is assumed to be one.
 
@@ -74,7 +74,7 @@ Following[^1] we are solving the following equation:
 
 $$ \frac d {ds} T_{rad}(s,\omega)= \frac{8\pi^3c^2}{k_B\omega^2} j_{2X}(s,\omega) \left( 1- \frac{T_{rad}(s,\omega)}{T_e(s)} \right)$$
 
-That is the same equation (7)[^1] with $N^2=1$ having transformed the intensity to temperature usign (9)[^1].
+That is the same equation (7)[^1] with $N^2=1$ having transformed the intensity to temperature usign (9)[^1]. Moreover the $s$ cohordinate is assumend to be coincident with the $r$, the cohordinate used to specify the profiles.
 
 $$j_{2X} = \eta_{2X} \frac{e^2\omega_{2X}^2}{16\pi^2\zeta^2} \frac{n_e}{\epsilon_0 c}  \cos^2 \theta (1+\sin^2 \theta)
 \frac {2\omega}{\omega_{2X}^2}\bar\Phi(\mu)$$
