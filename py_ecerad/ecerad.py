@@ -60,3 +60,65 @@ def radiation_temperature(r, ne, te, b, rs, theta):
     te_rad_profile = np.zeros((ns,nr), dtype=float)
     _library.radiation_temperature(nr, ns, r, ne, te, b, rs, theta, te_rad, te_rad_profile)
     return te_rad, te_rad_profile
+
+#subroutine j2x_python(nr, rp, ne, te, b, theta, rs, n, r, j2x, taylor)
+#    integer,value :: nr
+#    real(c_double),intent(in) :: rp(nr)
+#    real(c_double),intent(in) :: ne(nr)
+#    real(c_double),intent(in) :: te(nr)
+#    real(c_double),intent(in) :: b(nr)
+
+#    real(c_double),value :: theta
+#    real(c_double),value :: rs
+#    integer,value :: n
+#    real(c_double),intent(in) :: r(n)
+#    real(c_double),intent(out) :: j2x(n)
+#    integer, value :: taylor
+_library.j2x_python.restype = None
+_library.j2x_python.argtypes = [
+        c_int,                          # NR
+        ndpointer(dtype=float),         # rp
+        ndpointer(dtype=np.float64),    # ne
+        ndpointer(dtype=np.float64),    # te
+        ndpointer(dtype=np.float64),    # b
+        c_double,                       # theta
+        c_double,                       # rs
+        c_int,                          # n
+        ndpointer(dtype=np.float64),    # r
+        ndpointer(dtype=np.float64),    # j2x
+        c_int,                          # taylor
+]
+
+def j2x(rp, ne, te, b, theta, rs, r, taylor):
+    rp = np.ascontiguousarray(rp, dtype=np.float64)
+    ne = np.ascontiguousarray(ne, dtype=np.float64)
+    te = np.ascontiguousarray(te, dtype=np.float64)
+    b = np.ascontiguousarray(b, dtype=np.float64)
+    nr = rp.size
+    assert nr == ne.size and nr == te.size and nr == b.size
+    r = np.ascontiguousarray(r, dtype=np.float64)
+    n = r.size
+    j2x = np.zeros(n, dtype=float)
+    _library.j2x_python(nr, rp, ne, te, b, theta, rs, n, r, j2x, taylor)
+    return j2x
+
+#subroutine phi_taylor(n, mu, te, theta, r) bind(C)
+#    integer, value :: n
+#    real(c_double), intent(in) :: mu(n)
+#    real, value :: te
+#    real, value :: theta
+#    real(c_double), intent(out) :: r(n)
+_library.phi_taylor.restype = None
+_library.phi_taylor.argtypes = [
+    c_int, # n
+    ndpointer(dtype=np.float64), # mu
+    c_double, # te
+    c_double, # theta
+    ndpointer(dtype=np.float64) # r
+]
+def phi_taylor(mu, te, theta):
+    mu = np.ascontiguousarray(mu, dtype=np.float64)
+    n = mu.size
+    r = np.zeros(n, dtype=float)
+    _library.phi_taylor(n, mu, te, theta, r)
+    return r

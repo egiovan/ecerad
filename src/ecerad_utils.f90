@@ -7,7 +7,7 @@ module ecerad_utils
 
 contains
 
-function np_interp(x, xf, vf) result(r)
+pure function np_interp(x, xf, vf) result(r)
   real(wp),intent(in) :: x, xf(:), vf(:)
   real(wp) :: r
   integer :: n, i,is, ie, im
@@ -44,14 +44,14 @@ function np_interp(x, xf, vf) result(r)
     r = linear_interp(x, is)
   endif
 contains
-  real(wp) function linear_interp(x, i)
+  pure real(wp) function linear_interp(x, i)
     real(wp), intent(in) :: x
     integer,intent(in) :: i
     linear_interp = (vf(i+1) - vf(i))/(xf(i+1) - xf(i))*(x - xf(i)) + vf(i)
   end function  
 end function
 
-subroutine linspace(v, vmin, vmax)
+pure subroutine linspace(v, vmin, vmax)
   real(wp), intent(out) :: v(:)
   real(wp), intent(in) :: vmin, vmax
   real(wp) :: dv

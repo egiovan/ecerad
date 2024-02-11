@@ -4,7 +4,7 @@ module ecerad_base
     implicit none
     PRIVATE
     
-    public phi, e, epsilon_0, me, mec2, pi, c
+    public phi, e, epsilon_0, me, mec2, pi, c, phi_integral, phi_taylor
 
     real(wp), parameter :: mev_to_ev = 1e6_wp
     real(wp), parameter :: c = 299792458.0_wp
@@ -22,15 +22,24 @@ elemental function zeta(te) result(r)
     r = mec2/te/2
 end function
 !-------------------------------------------------------------------
-elemental subroutine alpha(mu, theta, ap, am)
+elemental subroutine alpha(mu, theta, ap, am, fail)
     real(wp), intent(in) :: mu, theta
     real(wp), intent(out) :: ap, am
+    logical, intent(out) :: fail
 
-    real(wp) :: eta
+    real(wp) :: eta, radix
 
     eta = 1 + mu*sin(theta)**2
-    ap = (1 + sqrt(1 - mu*cos(theta)**2)*sin(theta))**2/eta**2
-    am = (1 - sqrt(1 - mu*cos(theta)**2)*sin(theta))**2/eta**2
+    radix = 1 - mu*cos(theta)**2
+
+    if (radix <= 0) then
+        fail =.TRUE.
+        return
+    endif
+
+    fail = .FALSE.
+    ap = (1 + sqrt(radix)*sin(theta))**2/eta**2
+    am = (1 - sqrt(radix)*sin(theta))**2/eta**2
 end subroutine
 
 elemental subroutine approx(z, mu, ap5, ap7, ap9)
@@ -95,26 +104,52 @@ elemental function phi(mu, te, theta) result(r)
     real(wp), intent(in) :: mu, te
     real(wp), intent(in), optional :: theta
     real(wp) :: r
-    real(wp) :: f1, eta, alpha1, alpha2, int1, int2, z, theta_loc
-    z = zeta(te)
-    theta_loc = 0.0
-    if (present(theta)) theta_loc = theta
+    real(wp) :: theta_loc
 
-    f1 = z**1.5/(sqrt(pi) *  mu**2 * sin(theta_loc)**5)/2
-    eta = 1 + mu*sin(theta_loc)**2
-    !alpha1 = (1 + np.sqrt(1 - mu*np.cos(theta)**2)*np.sin(theta))**2/eta**2
-    !alpha2 = (1 - np.sqrt(1 - mu*np.cos(theta)**2)*np.sin(theta))**2/eta**2
-    if (abs(theta_loc) < THETA_TAYLOR_MAX) then
-        r = main_approx(z, mu, theta_loc)
-        return
-    end if
-    call alpha(mu, theta_loc, alpha1, alpha2)
+    theta_loc = 0.0_wp
+    if (present(theta)) theta_loc = theta
     
-    int1 = interno(theta_loc, alpha1, z, mu, eta)
-    int2 = interno(theta_loc, alpha2, z, mu, eta)
+    if (abs(theta_loc) < THETA_TAYLOR_MAX) then
+        r = phi_taylor(mu, te, theta_loc)
+    else
+        r = phi_integral(mu, te, theta_loc)
+    endif
+
+end function
+
+elemental function phi_integral(mu, te, theta) result(r)
+    real(wp), intent(in) :: mu, te
+    real(wp), intent(in) :: theta
+    real(wp) :: r
+    real(wp) :: f1, eta, alpha1, alpha2, int1, int2, z
+    logical :: fail
+    z = zeta(te)
+
+    f1 = z**1.5/(sqrt(pi) *  mu**2 * sin(theta)**5)/2
+    eta = 1 + mu*sin(theta)**2
+    
+    call alpha(mu, theta, alpha1, alpha2, fail)
+    if (fail) then
+        r = 0.0_wp
+        return
+    endif
+    int1 = interno(theta, alpha1, z, mu, eta)
+    int2 = interno(theta, alpha2, z, mu, eta)
     r = f1*(int1 - int2)
 
 end function
 
+
+elemental function phi_taylor(mu, te, theta) result(r)
+    real(wp), intent(in) :: mu, te
+    real(wp), intent(in) :: theta
+    real(wp) :: r
+
+    real(wp) :: z
+    
+    z = zeta(te)
+    r = 0.5_wp*main_approx(z, mu, theta) ! I made a mistake in the approximation
+
+end function
 
 end module

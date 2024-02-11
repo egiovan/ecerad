@@ -1,7 +1,7 @@
 module ecerad
   use ecerad_parameters, only: wp
   use ecerad_base, only: e, epsilon_0, me, c, mec2, pi
-  use ecerad_base, only: phi
+  use ecerad_base, only: phi, phi_integral, phi_taylor
   use dop853_solver, only: solve_dop853
   use flint_solver, only: solve_flint
   use ecerad_utils, only: np_interp
@@ -125,6 +125,66 @@ contains
   end subroutine
 end subroutine
 
+subroutine j2x_for_extern_call(rp, ne, te, b, theta, rs, r, j2x, taylor)
+  real(wp),intent(in) :: rp(:)
+  real(wp),intent(in) :: te(:)
+  real(wp),intent(in) :: ne(:)
+  real(wp),intent(in) :: b(:)
+  logical, intent(in) :: taylor
+
+  real(wp),intent(in) :: theta
+  real(wp),intent(in) :: rs
+  real(wp),intent(in) :: r(:)
+  real(wp),intent(out) :: j2x(:)
+
+  type(Profile) :: pr
+
+  pr%r = rp
+  pr%ne=ne
+  pr%te=te
+  pr%b=b
+
+  j2x = j2x_fun(pr, theta, rs, r, taylor)
+
+end subroutine
+
+
+elemental function j2x_fun(pr, theta, rs, r, taylor) result(j2x)
+  type(Profile), intent(in) :: pr
+  real(wp),intent(in) :: theta
+  real(wp),intent(in) :: rs ! define the resonance and then omega
+  real(wp),intent(in) :: r
+  logical, intent(in) :: taylor
+  real(wp) :: j2x
+
+  real(wp) :: B, Bs, eta_2x, mu, ne, te, omega, omega_2x, sqrt_mu
+  real(wp) :: termine, total_emission, zeta
+
+  eta_2x = 0.5_wp + &
+              (1.0_wp/8.0_wp*cos(theta)**4 + sin(theta)**2)/ &
+              ((1 + sin(theta)**2)*sqrt(sin(theta)**2 + 1.0_wp/16.0_wp*cos(theta)**4))
+  
+  te = np_interp(r, pr%r, pr%te)
+  ne = np_interp(r, pr%r, pr%ne)
+  B = np_interp(r, pr%r, pr%B)
+
+  Bs = np_interp(rs, pr%r, pr%B)
+  omega = 2*e*Bs/me
+  
+  zeta = mec2/te/2
+          
+  omega_2x = 2*e*B/me
+  mu = (omega/omega_2x)**2
+
+  total_emission = (e*omega_2x/4/pi/zeta)**2*ne/epsilon_0/c * cos(theta)**2*(1+sin(theta)**2)
+  sqrt_mu = sqrt(mu) 
+  termine = total_emission*8*pi**3*c**2/(kb*omega**2) * 2*sqrt_mu/omega_2x
+  if (taylor) then
+    j2x = eta_2x * termine * phi_taylor(mu, te, theta)
+  else
+    j2x = eta_2x * termine * phi_integral(mu, te, theta)
+  endif
+end function
 !===============================================================================================
 
 !---------------------------------------------------------------------------------------
