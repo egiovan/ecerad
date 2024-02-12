@@ -136,7 +136,9 @@ elemental function phi_integral(mu, te, theta) result(r)
     int1 = interno(theta, alpha1, z, mu, eta)
     int2 = interno(theta, alpha2, z, mu, eta)
     r = f1*(int1 - int2)
-
+    
+    ! It should always be positive 
+    if (r<0.0_wp) r = 0.0_wp
 end function
 
 

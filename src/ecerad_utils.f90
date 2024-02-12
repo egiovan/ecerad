@@ -3,7 +3,7 @@ module ecerad_utils
   implicit none
   private
 
-  public np_interp
+  public np_interp, linspace
 
 contains
 

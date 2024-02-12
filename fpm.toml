@@ -22,4 +22,5 @@ source-form = "free"
 [dependencies]
 dop853 = { git="https://github.com/jacobwilliams/dop853.git" }
 FLINT = { git="https://github.com/egiovan/FLINT.git" }
-
+[dev-dependencies]
+test-drive = { git="https://github.com/fortran-lang/test-drive.git"}
