@@ -87,7 +87,7 @@ $$\omega_{2X} = 2 \frac{eB}{m_e}\text{,    }
 
 and:
 
-$$\eta=\frac 1 2 + \frac{\frac 1 8 \cos^4 \theta + \sin^2 \theta}{(1+\sin^2 \theta)\sqrt{\sin^2 \theta + \frac 1 {16} \cos^4 \theta}}$$
+$$\eta_{2X}=\frac 1 2 + \frac{\frac 1 8 \cos^4 \theta + \sin^2 \theta}{(1+\sin^2 \theta)\sqrt{\sin^2 \theta + \frac 1 {16} \cos^4 \theta}}$$
 
 $$\bar\Phi(\mu) = \frac{\zeta^{3/2}}{2\sqrt\pi \mu^2 \sin^5\theta}\left(I(\alpha_1) -I(\alpha_2)\right)$$
 
